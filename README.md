@@ -19,6 +19,7 @@ This repo has two .NET Projects:
    1. `cd bin/Release/net5.0/linux-x64/publish`
    2. `zip sleeper.zip *`
    3. Upload `sleeper.zip` to Azure Batch application packages
+   4. Update `Program.cs` to the correct `ApplicationPackageReference` and `AZ_BATCH_APP_PACKAGE` values
 3. Run the Azure Batch Job
    1. Update `accountsettings.json` with Batch and Storage account settings
    2. From the azure-batch-queue directory `cd azure-batch`
