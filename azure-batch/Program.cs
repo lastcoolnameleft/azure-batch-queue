@@ -8,7 +8,6 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
     using System.Threading.Tasks;
     using Auth;
     using Batch.Common;
-    using Common;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
