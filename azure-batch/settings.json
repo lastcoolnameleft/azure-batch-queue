@@ -8,6 +8,6 @@
   "poolNodeVirtualMachineSize": "standard_d4_v2",
   "poolOSFamily": "5",
   "poolId": "HelloWorld-Pool",
-  "poolKeepAlive": true,
-  "jobKeepAlive": true 
+  "poolKeepAlive": false,
+  "jobKeepAlive": false 
 }

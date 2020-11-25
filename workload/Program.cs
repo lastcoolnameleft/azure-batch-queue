@@ -43,19 +43,32 @@ namespace sleeper_queue
 
         static async Task ConsumeMessages(QueueClient queue)
         {
-            QueueProperties properties = await queue.GetPropertiesAsync();
+            try {
+                QueueProperties properties = await queue.GetPropertiesAsync();
 
-            while (properties.ApproximateMessagesCount > 0)
-            {
-                int duration;
-                QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1);
-                duration = int.Parse(retrievedMessage[0].MessageText);
-                Console.WriteLine($"Sleeping for {duration} seconds");
-                Thread.Sleep(duration * 1000);
-                await queue.DeleteMessageAsync(retrievedMessage[0].MessageId, retrievedMessage[0].PopReceipt);
-                properties = await queue.GetPropertiesAsync();
+                if (properties != null) {
+                    while (properties.ApproximateMessagesCount > 0)
+                    {
+                        int duration;
+                        QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1);
+                        if (retrievedMessage.Length > 0) {
+                            //QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1, TimeSpan.FromSeconds(40));
+                            duration = int.Parse(retrievedMessage[0].MessageText);
+                            Console.WriteLine($"Sleeping for {duration} seconds");
+                            Thread.Sleep(duration * 1000);
+                            await queue.DeleteMessageAsync(retrievedMessage[0].MessageId, retrievedMessage[0].PopReceipt);
+                            properties = await queue.GetPropertiesAsync();
+                        } else {
+                            Console.WriteLine($"Queue drained. (retrievedMessage.Length = 0)");
+                            return;
+                        }
+                    }
+                }
+                Console.WriteLine($"Queue drained. (properties = null)");
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
             }
-            Console.WriteLine($"Queue drained.");
         }
         static async Task ProduceMessages(QueueClient queue, int count, int duration) 
         {

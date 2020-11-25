@@ -86,7 +86,7 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
                 finally
                 {
                     // Delete the job to ensure the tasks are cleaned up
-                    if (!string.IsNullOrEmpty(jobId) && helloWorldConfigurationSettings.ShouldDeleteJob)
+                    if (!string.IsNullOrEmpty(jobId) && !helloWorldConfigurationSettings.JobKeepAlive)
                     {
                         Console.WriteLine("Deleting job: {0}", jobId);
                         await batchClient.JobOperations.DeleteJobAsync(jobId);
@@ -137,7 +137,7 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
                                     Version = configurationSettings.ApplicationVersion }
                         },
                     },
-                    KeepAlive = false,
+                    KeepAlive = configurationSettings.PoolKeepAlive,
                     PoolLifetimeOption = PoolLifetimeOption.Job
                 }
             };
