@@ -83,7 +83,7 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
                     if (!string.IsNullOrEmpty(jobId) && helloWorldConfigurationSettings.ShouldDeleteJob)
                     {
                         Console.WriteLine("Deleting job: {0}", jobId);
-                        //await batchClient.JobOperations.DeleteJobAsync(jobId);
+                        await batchClient.JobOperations.DeleteJobAsync(jobId);
                     }
                 }
             }
@@ -115,7 +115,6 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
                     PoolSpecification = new PoolSpecification()
                     {
                         TargetDedicatedComputeNodes = configurationSettings.PoolTargetNodeCount,
-                        //CloudServiceConfiguration = new CloudServiceConfiguration(configurationSettings.PoolOSFamily),
                         VirtualMachineConfiguration = new VirtualMachineConfiguration(
                             new ImageReference(
                                 "UbuntuServer", "Canonical", "18.04-LTS", "latest"
@@ -128,8 +127,8 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
                         ApplicationPackageReferences = new List<ApplicationPackageReference>
                         {
                             new ApplicationPackageReference {
-                                    ApplicationId = "sleeper",
-                                    Version = "1.2" }
+                                    ApplicationId = configurationSettings.ApplicationId,
+                                    Version = configurationSettings.ApplicationVersion }
                         },
                     },
                     KeepAlive = false,
@@ -144,10 +143,20 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
             //await batchClient.JobOperations.AddTaskAsync(jobId, new CloudTask("task-env", "env"));
             //await batchClient.JobOperations.AddTaskAsync(jobId, new CloudTask("task-hostname", "/bin/sh -c \"hostname\""));
             // Task could should equal poolTargetNodeCount * # of cores in VM SKU
+            //TODO https://docs.microsoft.com/en-us/azure/batch/large-number-tasks#example-batch-net
+            // Create list of CloudTasks and addTaskAysnc in single operation.
             int i;
+            List<CloudTask> tasksToAdd = new List<CloudTask>(); // Populate with your tasks
+            //string cmd = "/bin/sh -c \"$AZ_BATCH_APP_PACKAGE_sleeper_1_2/sleeper-queue consume\"";
             for (i = 0; i < configurationSettings.TaskCount; i++) {
-                await batchClient.JobOperations.AddTaskAsync(jobId, new CloudTask($"sleeper-{i}", "/bin/sh -c \"$AZ_BATCH_APP_PACKAGE_sleeper_1_2/sleeper-queue consume\""));
+                tasksToAdd.Add(new CloudTask($"{configurationSettings.ApplicationId}-{i}", configurationSettings.TaskCommand));
             }
+            // https://docs.microsoft.com/en-us/azure/batch/large-number-tasks#example-batch-net
+            BatchClientParallelOptions parallelOptions = new BatchClientParallelOptions()
+            {
+                MaxDegreeOfParallelism = configurationSettings.MaxDegreeOfParallelism
+            };
+            await batchClient.JobOperations.AddTaskAsync(jobId, tasksToAdd, parallelOptions);
         }
 
         /// <summary>

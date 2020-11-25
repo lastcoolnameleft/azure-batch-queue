@@ -10,6 +10,7 @@ namespace sleeper_queue
     {
         static async Task<int> Main(string[] args)
         {
+            Console.WriteLine($"Running on {System.Environment.MachineName}");
             string connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
 
             if (args.Length == 0)

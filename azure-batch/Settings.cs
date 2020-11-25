@@ -11,6 +11,10 @@
         public string PoolNodeVirtualMachineSize { get; set; }
         public bool ShouldDeleteJob { get; set; }
         public int TaskCount { get; set; }
+        public string TaskCommand { get; set; }
+        public string ApplicationId{ get; set; }
+        public string ApplicationVersion { get; set; }
+        public int MaxDegreeOfParallelism { get; set; }
 
         public override string ToString()
         {
@@ -22,6 +26,10 @@
             SampleHelpers.AddSetting(stringBuilder, "PoolNodeVirtualMachineSize", this.PoolNodeVirtualMachineSize);
             SampleHelpers.AddSetting(stringBuilder, "ShouldDeleteJob", this.ShouldDeleteJob);
             SampleHelpers.AddSetting(stringBuilder, "TaskCount", this.TaskCount);
+            SampleHelpers.AddSetting(stringBuilder, "TaskCommand", this.TaskCommand);
+            SampleHelpers.AddSetting(stringBuilder, "ApplicationId", this.ApplicationId);
+            SampleHelpers.AddSetting(stringBuilder, "ApplicationVersion", this.ApplicationVersion);
+            SampleHelpers.AddSetting(stringBuilder, "MaxDegreeOfParallelism", this.MaxDegreeOfParallelism);
 
             return stringBuilder.ToString();
         }
