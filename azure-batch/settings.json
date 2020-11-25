@@ -1,4 +1,8 @@
-﻿{
+{
+  "maxDegreeOfParallelism": 15,
+  "taskCommand": "/bin/sh -c \"$AZ_BATCH_APP_PACKAGE_sleeper_1_3/sleeper-queue consume\"",
+  "applicationId": "sleeper",
+  "applicationVersion": "main",
   "poolTargetNodeCount": 2,
   "taskCount": 8,
   "poolNodeVirtualMachineSize": "standard_d4_v2",
