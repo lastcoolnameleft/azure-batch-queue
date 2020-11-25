@@ -45,6 +45,12 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
             //Console.ReadLine();
         }
 
+        public static string CreateJobId(string prefix)
+        {
+            // a job is uniquely identified by its ID so your account name along with a timestamp is added as suffix
+            return string.Format("{0}-{1}-{2}", prefix, Environment.UserName, DateTime.Now.ToString("yyyyMMdd-HHmmss"));
+        }
+
         /// <summary>
         /// Submits a job to the Azure Batch service, and waits for it to complete
         /// </summary>
@@ -67,7 +73,7 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
                 // add a retry policy. The built-in policies are No Retry (default), Linear Retry, and Exponential Retry
                 batchClient.CustomBehaviors.Add(RetryPolicyProvider.ExponentialRetryProvider(TimeSpan.FromSeconds(5), 3));
 
-                string jobId = GettingStartedCommon.CreateJobId("HelloWorldJob");
+                string jobId = CreateJobId("HelloWorldJob");
 
                 try
                 {
