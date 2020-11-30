@@ -133,7 +133,7 @@ namespace sleeper_queue
                     while (properties.ApproximateMessagesCount > 0)
                     {
                         int duration = 0;
-                        QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1);
+                        QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1, TimeSpan.FromSeconds(40));
                         if (retrievedMessage.Length > 0)
                         {
                             //QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1, TimeSpan.FromSeconds(40));
