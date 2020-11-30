@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Queues;
@@ -11,6 +13,7 @@ namespace sleeper_queue
         static async Task<int> Main(string[] args)
         {
             Console.WriteLine($"Running on {System.Environment.MachineName}");
+
             string connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
 
             if (args.Length == 0)
@@ -19,6 +22,10 @@ namespace sleeper_queue
                 Console.WriteLine("Usage: sleeper-queue consume or sleeper-queue produce <num>");
                 return 1;
             }
+
+            int proCount = Environment.ProcessorCount;
+
+            ServicePointManager.DefaultConnectionLimit = proCount;
 
             QueueClient queue = new QueueClient(connectionString, "sleeper");
 
@@ -31,51 +38,101 @@ namespace sleeper_queue
                 Console.WriteLine($"Going to Product {count} Messages. Value: {duration}");
                 await ProduceMessages(queue, count, duration);
                 return 0;
-            } else if (args[0] == "consume") {
+            }
+            else if (args[0] == "consume")
+            {
                 Console.WriteLine($"Going to Consume Messages");
-                await ConsumeMessages(queue);
+
+                List<Task<bool>> tasks = new List<Task<bool>>();
+
+                for (int i = 0; i < proCount; i++)
+                {
+                    tasks.Add(Task.Run(() => ConsumeMessages(queue)));
+                }
+
+                Task t = Task.WhenAll(tasks.ToArray());
+                try
+                {
+                    await t;
+                }
+                catch (AggregateException) { }
+
+                if (t.Status == TaskStatus.RanToCompletion)
+                    Console.WriteLine("All tasks are done");
+                else if (t.Status == TaskStatus.Faulted)
+                    Console.WriteLine("Task failed");
+                else
+                {
+                    foreach (var ct in tasks)
+                        Console.WriteLine("Task {0}: {1} with result {2}", ct.Id, ct.Status, ct.Result);
+                }
+
                 return 0;
-            } else {
+            }
+            else
+            {
                 Console.WriteLine($"Unexpected value {args[1]}");
                 return 1;
             }
         }
-
-        static async Task ConsumeMessages(QueueClient queue)
+        static async Task<bool> ConsumeMessages(QueueClient queue)
         {
-            try {
+            try
+            {
                 QueueProperties properties = await queue.GetPropertiesAsync();
 
-                if (properties != null) {
+                if (properties != null)
+                {
                     while (properties.ApproximateMessagesCount > 0)
                     {
-                        int duration;
+                        int duration = 0;
                         QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1);
-                        if (retrievedMessage.Length > 0) {
+                        if (retrievedMessage.Length > 0)
+                        {
                             //QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1, TimeSpan.FromSeconds(40));
-                            duration = int.Parse(retrievedMessage[0].MessageText);
-                            Console.WriteLine($"Sleeping for {duration} seconds");
+                            if (!String.IsNullOrEmpty(retrievedMessage[0].MessageText))
+                            {
+                                duration = Convert.ToInt32(retrievedMessage[0].MessageText);
+
+                                Console.WriteLine($"Sleeping for {retrievedMessage[0].MessageText} seconds");
+                            }
+
                             Thread.Sleep(duration * 1000);
+
+                            var tId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                            Console.WriteLine("Processed message {0} in thread {1}", retrievedMessage[0].MessageId, tId.ToString());
+
                             await queue.DeleteMessageAsync(retrievedMessage[0].MessageId, retrievedMessage[0].PopReceipt);
                             properties = await queue.GetPropertiesAsync();
-                        } else {
+
+                        }
+                        else
+                        {
+
                             Console.WriteLine($"Queue drained. (retrievedMessage.Length = 0)");
-                            return;
+
+                            return false;
                         }
                     }
                 }
                 Console.WriteLine($"Queue drained. (properties = null)");
-            } catch (Exception e) {
+                return true;
+
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);
+                return false;
             }
         }
-        static async Task ProduceMessages(QueueClient queue, int count, int duration) 
+        static async Task ProduceMessages(QueueClient queue, int count, int duration)
         {
             int i;
-            for (i = 0; i < count; i++) {
+            for (i = 0; i < count; i++)
+            {
                 Console.WriteLine($"Inserting {duration} into queue.");
-               await InsertMessageAsync(queue, duration.ToString()); 
+                await InsertMessageAsync(queue, duration.ToString());
             }
         }
 

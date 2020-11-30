@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "sleeper-queue": {
+      "commandName": "Project"
+    }
+  }
+}
