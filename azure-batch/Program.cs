@@ -127,7 +127,7 @@ namespace Microsoft.Azure.Batch.Samples.HelloWorld
                             ),
                             "batch.node.ubuntu 18.04"
                         ),
-                        TaskSlotsPerNode = 4,  // 1 for D1v2
+                        TaskSlotsPerNode = configurationSettings.TaskSlotsPerNode,
                         TaskSchedulingPolicy = new TaskSchedulingPolicy(ComputeNodeFillType.Spread),
                         VirtualMachineSize = configurationSettings.PoolNodeVirtualMachineSize,
                         ApplicationPackageReferences = new List<ApplicationPackageReference>

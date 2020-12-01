@@ -20,28 +20,21 @@ namespace sleeper_queue
             if (args.Length == 0)
             {
                 Console.WriteLine("First argument must be 'consume' or 'produce'");
-                Console.WriteLine("Usage: sleeper-queue consume or sleeper-queue produce <num>");
+                Console.WriteLine("Usage: sleeper-queue consume or sleeper-queue produce <message count> <thread count> <duration>");
                 return 1;
             }
-
-         
 
             QueueClient queue = new QueueClient(connectionString, "sleeper");
 
             if (args[0] == "produce")
             {
-                // int proCount = Environment.ProcessorCount;
-
-                //setting the default limit as 64 for getting more throughput for sending messages
-                int proCount = 64;
-
-                ServicePointManager.DefaultConnectionLimit = proCount;
-
                 int count;
                 int duration;
+                int threadCount;
                 int.TryParse(args[1], out count);
-                int.TryParse(args[2], out duration);
-                Console.WriteLine($"Going to Product {count} Messages. Value: {duration}");
+                int.TryParse(args[2], out threadCount);
+                int.TryParse(args[3], out duration);
+                Console.WriteLine($"Going to Produce {threadCount * count} Messages. Threads: {threadCount}, Msg per thread: {count}, Value: {duration}");
 
                 List<Task<bool>> tasks = new List<Task<bool>>();
 
@@ -50,7 +43,7 @@ namespace sleeper_queue
                 // Begin timing.
                 stopwatch.Start();
 
-                for (int i = 0; i < proCount; i++)
+                for (int i = 0; i < threadCount; i++)
                 {
                     tasks.Add(Task.Run(() => ProduceMessages(queue, count, duration)));
                 }
@@ -133,21 +126,21 @@ namespace sleeper_queue
                     while (properties.ApproximateMessagesCount > 0)
                     {
                         int duration = 0;
+                        // Setting to 40 seconds since default time it sleeps is 30 seconds
                         QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1, TimeSpan.FromSeconds(40));
                         if (retrievedMessage.Length > 0)
                         {
-                            //QueueMessage[] retrievedMessage = await queue.ReceiveMessagesAsync(1, TimeSpan.FromSeconds(40));
                             if (!String.IsNullOrEmpty(retrievedMessage[0].MessageText))
                             {
                                 duration = Convert.ToInt32(retrievedMessage[0].MessageText);
 
-                                Console.WriteLine($"Sleeping for {retrievedMessage[0].MessageText} seconds");
+                                Console.WriteLine($"{DateTime.Now} Sleeping for {retrievedMessage[0].MessageText} seconds");
                             }
 
                             Thread.Sleep(duration * 1000);
 
                             var tId = System.Threading.Thread.CurrentThread.ManagedThreadId;
-                            Console.WriteLine("Processed message {0} in thread {1}", retrievedMessage[0].MessageId, tId.ToString());
+                            Console.WriteLine($"{DateTime.Now} Processed message {retrievedMessage[0].MessageId} in thread {tId.ToString()}");
 
                             await queue.DeleteMessageAsync(retrievedMessage[0].MessageId, retrievedMessage[0].PopReceipt);
 
@@ -157,13 +150,13 @@ namespace sleeper_queue
                         else
                         {
 
-                            Console.WriteLine($"Queue drained. (retrievedMessage.Length = 0)");
+                            Console.WriteLine($"{DateTime.Now} Queue drained. (retrievedMessage.Length = 0)");
 
                             return false;
                         }
                     }
                 }
-                Console.WriteLine($"Queue drained. (properties = null)");
+                Console.WriteLine($"{DateTime.Now} Queue drained. (properties = null)");
                 return true;
 
             }

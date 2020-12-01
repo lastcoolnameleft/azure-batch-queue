@@ -15,6 +15,7 @@
         public string ApplicationId{ get; set; }
         public string ApplicationVersion { get; set; }
         public int MaxDegreeOfParallelism { get; set; }
+        public int TaskSlotsPerNode { get; set; }
         public bool PoolKeepAlive { get; set; }
 
         public override string ToString()
@@ -31,6 +32,7 @@
             SampleHelpers.AddSetting(stringBuilder, "ApplicationId", this.ApplicationId);
             SampleHelpers.AddSetting(stringBuilder, "ApplicationVersion", this.ApplicationVersion);
             SampleHelpers.AddSetting(stringBuilder, "MaxDegreeOfParallelism", this.MaxDegreeOfParallelism);
+            SampleHelpers.AddSetting(stringBuilder, "TaskSlotsPerNode", this.TaskSlotsPerNode);
             SampleHelpers.AddSetting(stringBuilder, "PoolKeepAlive", this.PoolKeepAlive);
 
             return stringBuilder.ToString();

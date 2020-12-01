@@ -13,8 +13,8 @@ This repo has two .NET Projects:
    1. `dotnet publish -r linux-x64 -c Release --self-contained=true`
 1. Push workload messages to the queue
    1. `export AZURE_STORAGE_CONNECTION_STRING="..."`
-   1. `dotnet run produce 20 30`
-      1. This pushes 20 messages, each with the value "30"
+   1. `dotnet run produce 10 20 30`
+      1. This uses 20 threads, each thread creates 10 messages, each with the value "30"
 2. Publish the Azure Batch Application Package
    1. `cd bin/Release/net5.0/linux-x64/publish`
    2. `zip sleeper.zip *`

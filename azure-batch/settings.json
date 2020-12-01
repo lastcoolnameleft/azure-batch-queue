@@ -1,13 +1,14 @@
 {
   "maxDegreeOfParallelism": 15,
-  "taskCommand": "/bin/sh -c \"$AZ_BATCH_APP_PACKAGE_sleeper_main/sleeper-queue consume\"",
+  "taskCommand": "/bin/sh -c \"$AZ_BATCH_APP_PACKAGE_sleeper_threaded/sleeper-queue consume\"",
   "applicationId": "sleeper",
-  "applicationVersion": "main",
+  "applicationVersion": "threaded",
   "poolTargetNodeCount": 2,
-  "taskCount": 8,
-  "poolNodeVirtualMachineSize": "standard_d4_v2",
+  "taskCount": 2,
+  "taskSlotsPerNode": 1,
+  "poolNodeVirtualMachineSize": "Standard_D48_v3",
   "poolOSFamily": "5",
   "poolId": "HelloWorld-Pool",
-  "poolKeepAlive": false,
-  "jobKeepAlive": false 
+  "poolKeepAlive": true,
+  "jobKeepAlive": true
 }
