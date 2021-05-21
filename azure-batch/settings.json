@@ -1,8 +1,8 @@
 {
   "maxDegreeOfParallelism": 15,
-  "taskCommand": "/bin/sh -c \"$AZ_BATCH_APP_PACKAGE_sleeper_threaded/sleeper-queue consume\"",
+  "taskCommand": "/bin/sh -c \"$AZ_BATCH_APP_PACKAGE_sleeper_main/sleeper-queue consume\"",
   "applicationId": "sleeper",
-  "applicationVersion": "threaded",
+  "applicationVersion": "main",
   "poolTargetNodeCount": 2,
   "taskCount": 2,
   "taskSlotsPerNode": 1,
